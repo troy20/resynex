@@ -15,6 +15,8 @@ export async function getCurrentUser() {
   if(!session||session.expiresAt<new Date()) return null;
   return session.user;
 }
+// Alias for backward compatibility
+export const getUser = getCurrentUser;
 export async function requireUser() { const user=await getCurrentUser(); if(!user) throw new Error("Unauthorized"); return user; }
 export async function clearSession() { const token=(await cookies()).get(SESSION_COOKIE)?.value; if(token) await prisma.session.deleteMany({where:{token}}); (await cookies()).delete(SESSION_COOKIE); }
 export function requireVerified(user: { emailVerifiedAt: Date | null }) { if(!user.emailVerifiedAt) throw new Error("Please verify your email first."); }
