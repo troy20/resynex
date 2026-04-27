@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { money } from "@/lib/utils";
+export default async function Problems(){const problems=await prisma.problemPost.findMany({include:{user:true},orderBy:{createdAt:'desc'}});return <main className="mx-auto max-w-7xl px-6 py-10"><h1 className="text-3xl font-bold">Industry Problems</h1><p className="mt-2 text-slate-600">Browse real R&D and technical problems from companies.</p><div className="mt-8 grid gap-5 md:grid-cols-2">{problems.map(p=><Link href={`/problems/${p.id}`} key={p.id} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-lg"><div className="text-lg font-semibold">{p.title}</div><div className="mt-2 text-sm text-slate-500">{p.field} · {money(p.budgetMin,p.budgetMax)}</div><p className="mt-3 line-clamp-3 text-slate-600">{p.description}</p></Link>)}</div></main>}

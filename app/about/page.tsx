@@ -1,0 +1,1 @@
+export default function About(){return <main className="mx-auto max-w-4xl px-6 py-10"><h1 className="text-3xl font-bold">About Resynex</h1><p className="mt-4 text-slate-600 leading-8">Resynex connects university facilities, academic expertise, industry problems, startups, and research community discussions in one professional platform.</p></main>}

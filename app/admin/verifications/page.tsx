@@ -1,0 +1,2 @@
+import { prisma } from "@/lib/prisma";
+export default async function AdminVerifications(){const reqs=await prisma.verificationRequest.findMany({include:{user:true},orderBy:{createdAt:'desc'}});return <main className="mx-auto max-w-5xl px-6 py-10"><h1 className="text-3xl font-bold">Verification Queue</h1><div className="mt-6 space-y-3">{reqs.map(r=><div key={r.id} className="rounded-2xl bg-white p-4 ring-1 ring-slate-200"><b>{r.user.fullName}</b> · {r.status}<p>{r.notes}</p></div>)}</div></main>}

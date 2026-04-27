@@ -1,0 +1,1 @@
+export function money(min?: number | null, max?: number | null) { if(min&&max) return `$${min.toLocaleString()}–$${max.toLocaleString()}`; if(min) return `From $${min.toLocaleString()}`; if(max) return `Up to $${max.toLocaleString()}`; return "Open"; }

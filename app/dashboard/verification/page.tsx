@@ -1,0 +1,2 @@
+import { requireUser } from "@/lib/auth";
+export default async function Verification(){const user=await requireUser(); return <div><h1 className="text-3xl font-bold">Verification</h1><div className="mt-6 rounded-3xl bg-white p-6 ring-1 ring-slate-200"><p>Your current status: <b>{user.verificationStatus}</b></p><p className="mt-2 text-slate-600">Email verified: {user.emailVerifiedAt?'Yes':'No. Check your email or terminal log for verification link.'}</p></div></div>}

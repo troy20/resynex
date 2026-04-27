@@ -1,0 +1,396 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  ACADEMIC
+  STUDENT
+  INDUSTRY
+  UNIVERSITY
+  STARTUP
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  EMAIL_VERIFIED
+  PENDING_REVIEW
+  PENDING_APPROVAL
+  APPROVED
+  VERIFIED
+  REJECTED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum ProposalStatus {
+  PENDING
+  REVIEWING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum FacilityRequestType {
+  INQUIRY
+  BOOKING
+  QUOTE
+}
+
+enum FacilityRequestStatus {
+  PENDING
+  REVIEWING
+  APPROVED
+  DECLINED
+  PAID
+  CANCELLED
+}
+
+enum CommunityPostType {
+  POST
+  QUESTION
+  ANNOUNCEMENT
+  DISCUSSION
+}
+
+enum SavedItemType {
+  PROBLEM
+  FACILITY
+  COMMUNITY_POST
+}
+
+model User {
+  id                  String             @id @default(cuid())
+  fullName            String
+  email               String             @unique
+  passwordHash        String
+  role                UserRole
+  avatarUrl           String?
+  bio                 String?
+  country             String?
+  city                String?
+  emailVerifiedAt     DateTime?
+  verificationStatus  VerificationStatus @default(UNVERIFIED)
+  onboardingCompleted Boolean            @default(false)
+  interests           String[]
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  sessions          Session[]
+  emailTokens       EmailVerificationToken[]
+  academicProfile   AcademicProfile?
+  studentProfile    StudentProfile?
+  industryProfile   IndustryProfile?
+  universityProfile UniversityProfile?
+  startupProfile    StartupProfile?
+
+  problems             ProblemPost[]
+  facilities           FacilityListing[]
+  proposals            Proposal[]
+  facilityRequests     FacilityRequest[]
+  savedItems           SavedItem[]
+  notifications        Notification[]
+  verificationRequests VerificationRequest[]
+  communityPosts       CommunityPost[]
+  communityComments    CommunityComment[]
+  communityReactions   CommunityReaction[]
+  conversations        ConversationParticipant[]
+  messages             Message[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  userId    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AcademicProfile {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  institutionName    String
+  institutionalEmail String
+  department         String?
+  title              String?
+  researchFields     String[]
+  orcidUrl           String?
+  publicationsUrl    String?
+  skills             String[]
+  qualifications     String[]
+  experience         String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StudentProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  universityName String?
+  degreeLevel    String?
+  major          String?
+  graduationYear Int?
+  skills         String[]
+  interests      String[]
+  qualifications String[]
+  experience     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model IndustryProfile {
+  id                        String  @id @default(cuid())
+  userId                    String  @unique
+  legalCompanyName          String
+  tradingName               String?
+  abn                       String?
+  companyRegistrationNumber String?
+  websiteUrl                String?
+  sector                    String?
+  headquartersCountry       String?
+  contactPersonName         String?
+  businessEmail             String?
+  skills                    String[]
+  qualifications            String[]
+  experience                String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UniversityProfile {
+  id                     String  @id @default(cuid())
+  userId                 String  @unique
+  officialUniversityName String
+  facultyOrDepartment    String?
+  institutionalEmail     String
+  officialWebsite        String?
+  country                String?
+  campusLocation         String?
+  skills                 String[]
+  qualifications         String[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model StartupProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  startupName String
+  stage       String?
+  sector      String?
+  websiteUrl  String?
+  country     String?
+  description String?
+  skills      String[]
+  qualifications String[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ProblemPost {
+  id                   String     @id @default(cuid())
+  userId               String
+  title                String
+  description          String
+  field                String?
+  expectedOutcome      String?
+  budgetMin            Float?
+  budgetMax            Float?
+  deadline             DateTime?
+  confidentialityLevel String?
+  status               PostStatus @default(PUBLISHED)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  proposals  Proposal[]
+  savedItems SavedItem[]
+}
+
+model FacilityListing {
+  id              String     @id @default(cuid())
+  userId          String
+  title           String
+  description     String
+  facilityType    String?
+  field           String?
+  equipmentList   String[]
+  location        String?
+  institutionName String?
+  accessType      String?
+  pricingModel    String?
+  basePrice       Float?
+  bookingEnabled  Boolean    @default(true)
+  status          PostStatus @default(PUBLISHED)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requests   FacilityRequest[]
+  savedItems SavedItem[]
+}
+
+model FacilityRequest {
+  id              String                @id @default(cuid())
+  facilityId      String
+  requesterUserId String
+  type            FacilityRequestType
+  requestedStart  DateTime?
+  requestedEnd    DateTime?
+  purpose         String
+  message         String?
+  status          FacilityRequestStatus @default(PENDING)
+  quotedAmount    Float?
+  paymentStatus   String                @default("UNPAID")
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+
+  facility  FacilityListing @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  requester User            @relation(fields: [requesterUserId], references: [id], onDelete: Cascade)
+}
+
+model Proposal {
+  id              String         @id @default(cuid())
+  applicantUserId String
+  problemId       String?
+  proposalMessage String
+  budgetOffer     Float?
+  status          ProposalStatus @default(PENDING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  applicant User         @relation(fields: [applicantUserId], references: [id], onDelete: Cascade)
+  problem   ProblemPost? @relation(fields: [problemId], references: [id], onDelete: Cascade)
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  members  ConversationParticipant[]
+  messages Message[]
+}
+
+model ConversationParticipant {
+  id             String @id @default(cuid())
+  conversationId String
+  userId         String
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Message {
+  id             String    @id @default(cuid())
+  conversationId String
+  senderUserId   String
+  body           String
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderUserId], references: [id], onDelete: Cascade)
+}
+
+model SavedItem {
+  id              String        @id @default(cuid())
+  userId          String
+  type            SavedItemType
+  problemId       String?
+  facilityId      String?
+  communityPostId String?
+  createdAt       DateTime      @default(now())
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem       ProblemPost?     @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  facility      FacilityListing? @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  communityPost CommunityPost?   @relation(fields: [communityPostId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  actionUrl String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationRequest {
+  id                    String             @id @default(cuid())
+  userId                String
+  targetType            String
+  supportingDocumentUrl String?
+  notes                 String?
+  adminReviewNotes      String?
+  status                VerificationStatus @default(PENDING_REVIEW)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CommunityPost {
+  id           String            @id @default(cuid())
+  authorUserId String
+  type         CommunityPostType @default(POST)
+  title        String
+  content      String
+  topic        String?
+  tags         String[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  author     User                @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  comments   CommunityComment[]
+  reactions  CommunityReaction[]
+  savedItems SavedItem[]
+}
+
+model CommunityComment {
+  id              String   @id @default(cuid())
+  postId          String
+  authorUserId    String
+  content         String
+  parentCommentId String?
+  createdAt       DateTime @default(now())
+
+  post   CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User          @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+}
+
+model CommunityReaction {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  type      String   @default("LIKE")
+  createdAt DateTime @default(now())
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
