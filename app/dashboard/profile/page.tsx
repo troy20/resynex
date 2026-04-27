@@ -18,22 +18,26 @@ export default async function Profile() {
     },
   });
 
+  // Helper to filter out null values
+  const filterNulls = (obj: Record<string, unknown>) => 
+    Object.fromEntries(Object.entries(obj).filter(([_, v]) => v !== null));
+
   const profileData = {
     fullName: user?.fullName || "",
     email: user?.email || "",
     role: user?.role || "",
-    bio: user?.bio || "",
-    country: user?.country || "",
-    city: user?.city || "",
-    avatarUrl: user?.avatarUrl || "",
+    bio: user?.bio || undefined,
+    country: user?.country || undefined,
+    city: user?.city || undefined,
+    avatarUrl: user?.avatarUrl || undefined,
     skills: [],
     qualifications: [],
-    experience: "",
-    ...(user?.academicProfile || {}),
-    ...(user?.studentProfile || {}),
-    ...(user?.industryProfile || {}),
-    ...(user?.universityProfile || {}),
-    ...(user?.startupProfile || {}),
+    experience: undefined,
+    ...filterNulls(user?.academicProfile || {}),
+    ...filterNulls(user?.studentProfile || {}),
+    ...filterNulls(user?.industryProfile || {}),
+    ...filterNulls(user?.universityProfile || {}),
+    ...filterNulls(user?.startupProfile || {}),
   };
 
   return (

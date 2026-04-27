@@ -86,7 +86,6 @@ export async function POST(req: Request) {
           institutionalEmail: data.institutionalEmail || data.email,
           officialWebsite: data.websiteUrl,
           facultyOrDepartment: data.department,
-          contactPersonName: data.contactPersonName,
         },
       });
     } else if (role === "STARTUP") {
