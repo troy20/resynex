@@ -75,7 +75,6 @@ export async function POST(req: Request) {
           websiteUrl: data.websiteUrl,
           sector: data.sector,
           businessEmail: data.businessEmail || data.email,
-          contactPersonName: data.contactPersonName,
         },
       });
     } else if (role === "UNIVERSITY") {
