@@ -42,6 +42,13 @@ export const registerSchema = z.object({
   // Startup fields
   startupName: z.string().optional(),
   stage: z.string().optional(),
+  
+  // Industry problem fields (required for industry registration)
+  problemTitle: z.string().optional(),
+  problemDescription: z.string().optional(),
+  problemField: z.string().optional(),
+  problemBudgetMin: z.number().optional(),
+  problemBudgetMax: z.number().optional(),
 }).superRefine((v, ctx) => {
   // Academic and University should use institutional email
   if ((v.role === "ACADEMIC" || v.role === "UNIVERSITY") && !isInstitutionEmail(v.email)) {
@@ -86,5 +93,23 @@ export const registerSchema = z.object({
       path: ["startupName"],
       message: "Startup name is required.",
     });
+  }
+  
+  // Industry requires problem details
+  if (v.role === "INDUSTRY") {
+    if (!v.problemTitle) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["problemTitle"],
+        message: "Problem title is required for industry accounts.",
+      });
+    }
+    if (!v.problemDescription) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["problemDescription"],
+        message: "Problem description is required for industry accounts.",
+      });
+    }
   }
 });

@@ -63,6 +63,12 @@ enum CommunityPostType {
   DISCUSSION
 }
 
+enum CommunityGroupType {
+  PUBLIC
+  PRIVATE
+  INVITE_ONLY
+}
+
 enum SavedItemType {
   PROBLEM
   FACILITY
@@ -115,6 +121,8 @@ model User {
   messages             Message[]
   sentFriendRequests   FriendRequest[]     @relation("FriendRequestSender")
   receivedFriendRequests FriendRequest[]   @relation("FriendRequestReceiver")
+  createdGroups        CommunityGroup[]    @relation("CommunityGroupCreator")
+  groupMemberships     CommunityGroupMember[] @relation("CommunityGroupMemberships")
 }
 
 model Session {
@@ -379,6 +387,7 @@ model VerificationRequest {
 model CommunityPost {
   id           String            @id @default(cuid())
   authorUserId String
+  groupId      String?
   type         CommunityPostType @default(POST)
   title        String
   content      String
@@ -388,9 +397,37 @@ model CommunityPost {
   updatedAt    DateTime          @updatedAt
 
   author     User                @relation(fields: [authorUserId], references: [id], onDelete: Cascade)
+  group      CommunityGroup?     @relation(fields: [groupId], references: [id], onDelete: Cascade)
   comments   CommunityComment[]
   reactions  CommunityReaction[]
   savedItems SavedItem[]
+}
+
+model CommunityGroup {
+  id          String              @id @default(cuid())
+  name        String
+  description String?
+  type        CommunityGroupType @default(PUBLIC)
+  createdById String
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  createdBy   User                  @relation("CommunityGroupCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  posts       CommunityPost[]
+  members     CommunityGroupMember[] @relation("CommunityGroupMembers")
+}
+
+model CommunityGroupMember {
+  id        String   @id @default(cuid())
+  groupId   String
+  userId    String
+  role      String   @default("MEMBER") // ADMIN, MODERATOR, MEMBER
+  joinedAt  DateTime @default(now())
+
+  group CommunityGroup @relation("CommunityGroupMembers", fields: [groupId], references: [id], onDelete: Cascade)
+  user  User           @relation("CommunityGroupMemberships", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, userId])
 }
 
 model CommunityComment {

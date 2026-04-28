@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { randomBytes } from "crypto";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation";
-import { sendVerificationEmail } from "@/lib/email";
+import { sendVerificationEmail, generateVerificationCode } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -101,15 +100,30 @@ export async function POST(req: Request) {
 
     // Send verification email only for personal users (not for approval-needed users)
     if (!needsApproval) {
-      const token = randomBytes(32).toString("hex");
+      const code = generateVerificationCode();
       await prisma.emailVerificationToken.create({
         data: {
-          token,
+          token: code,
           userId: user.id,
           expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
         },
       });
-      await sendVerificationEmail(user.email, token);
+      await sendVerificationEmail(user.email, code);
+    }
+
+    // Create problem for industry users
+    if (role === "INDUSTRY" && data.problemTitle && data.problemDescription) {
+      await prisma.problemPost.create({
+        data: {
+          userId: user.id,
+          title: data.problemTitle,
+          description: data.problemDescription,
+          field: data.problemField,
+          budgetMin: data.problemBudgetMin,
+          budgetMax: data.problemBudgetMax,
+          status: "PUBLISHED",
+        },
+      });
     }
 
     return NextResponse.json({

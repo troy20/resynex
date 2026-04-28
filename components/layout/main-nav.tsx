@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCurrentUser } from "@/lib/auth";
 import { LogoutButton } from "@/components/layout/logout-button";
+import { SearchBar } from "@/components/layout/search-bar";
 
 export async function MainNav() {
   const user = await getCurrentUser();
@@ -17,11 +18,14 @@ export async function MainNav() {
           </div>
         </Link>
 
+        <SearchBar />
+
         {!user ? (
           <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
             <Link href="/facilities" className="text-white/90 hover:text-white">Facilities</Link>
             <Link href="/problems" className="text-white/90 hover:text-white">Problems</Link>
             <Link href="/community" className="text-white/90 hover:text-white">Community</Link>
+            <Link href="/community/groups" className="text-white/90 hover:text-white">Groups</Link>
             <Link href="/about" className="text-white/90 hover:text-white">About</Link>
             <Link href="/contact" className="text-white/90 hover:text-white">Contact</Link>
             <a href="/#auth" className="rounded-xl border border-white/25 bg-white/10 px-4 py-2 text-white backdrop-blur hover:bg-white/20">Log in</a>
