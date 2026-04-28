@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Post {
   id: string;
@@ -138,7 +139,9 @@ export function CommunityFeed() {
               {post.author.fullName[0]}
             </div>
             <div>
-              <div className="font-semibold">{post.author.fullName}</div>
+              <Link href={`/profiles/${post.author.id}`} className="font-semibold text-blue-700 hover:underline">
+                {post.author.fullName}
+              </Link>
               <div className="text-xs text-slate-500">
                 {post.author.role} · {new Date(post.createdAt).toLocaleDateString()}
               </div>
