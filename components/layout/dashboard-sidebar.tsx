@@ -33,7 +33,7 @@ export async function DashboardSidebar() {
   ];
 
   const roleLinks = role === "INDUSTRY"
-    ? [["/dashboard/create/problem", "Post Problem"], ["/dashboard", "Proposals"]]
+    ? [["/dashboard/create/problem", "Post Problem"], ["/dashboard/proposals", "Proposals"]]
     : role === "UNIVERSITY"
     ? [["/dashboard/create/facility", "Add Facility"], ["/dashboard", "Facility Requests"]]
     : role === "ACADEMIC"
